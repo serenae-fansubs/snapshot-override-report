@@ -58,9 +58,9 @@ node dist
 
 #### Command line options
 
-- `--proposal=<proposalId>` -- Pass the proposal ID in directly instead of with interactive input
-- `--json` -- Print the report in JSON format instead
-- `--debug` -- Enable debug logging
+- `--proposal=<proposalId>` — Pass the proposal ID in directly instead of with interactive input
+- `--json` — Print the report in JSON format instead
+- `--debug` — Enable debug logging
 
 #### Report JSON format
 
@@ -78,6 +78,7 @@ If you pass the `--json` command line option, the report will have the following
   },
   "deltas": {
     "1": {
+      "name": "For",
       "delta": -100,
       "delegates": [
         "0x2222222222222222222222222222222222222222"
@@ -85,6 +86,7 @@ If you pass the `--json` command line option, the report will have the following
       "delegators": []
     },
     "2": {
+      "name": "Against",
       "delta": 100,
       "delegates": [],
       "delegators": [
