@@ -340,10 +340,16 @@ async function getPrimaryNames(overrides: Record<string, Record<any, any>>, debu
     const details = overrideEntries[i][1];
     const addresses = Object.keys(primaryNames);
     if (!addresses.includes(delegator)) {
-      primaryNames[delegator] = await getPrimaryName(ens, delegator);
+      const primaryName = await getPrimaryName(ens, delegator);
+      if (primaryName) {
+        primaryNames[delegator] = primaryName;
+      }
     }
     if (details.delegate && !addresses.includes(details.delegate)) {
-      primaryNames[details.delegate] = await getPrimaryName(ens, details.delegate);
+      const primaryName = await getPrimaryName(ens, details.delegate);
+      if (primaryName) {
+        primaryNames[details.delegate] = primaryName;
+      }
     }
   }
   if (debug) {
