@@ -169,6 +169,10 @@ async function _getOverrides(proposal: Record<any, any>, debug=false): Promise<R
     })));
   }
 
+  if (debug) {
+    console.debug('voters', voters);
+  }
+
   const delegators = await getDelegators(totalAddresses, network, snapshot, tokenAddress, debug);
 
   const balances = await getBalances(totalAddresses, network, snapshot, tokenAddress, decimals, debug);
@@ -180,8 +184,8 @@ async function _getOverrides(proposal: Record<any, any>, debug=false): Promise<R
       {
         choice: voters[voter],
         balance: balances[voter],
-        delegate: getDelegate(delegators, voter),
-        delegateChoice: voters[getDelegate(delegators, voter)] || null
+        delegate: delegators[voter],
+        delegateChoice: voters[getDelegateForChoice(delegators, voterAddresses, voter)] || null
       }
     ]
   ));
@@ -319,9 +323,9 @@ async function getBalances(addresses: Array<string>, network: string, snapshot: 
   return balances;
 }
 
-function getDelegate(delegators: Record<string, string>, voter: string) {
+function getDelegateForChoice(delegators: Record<string, string>, voterAddresses: Array<string>, voter: string) {
   const delegate = delegators[voter];
-  if (delegate && delegators[delegate]) {
+  if (delegate && !voterAddresses.includes(delegate) && delegators[delegate]) {
     return delegators[delegate];
   }
   return delegate;
