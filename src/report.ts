@@ -20,12 +20,10 @@ async function printOverrideReport(proposalId: string, retrievePrimaryNames=true
   console.log('\nOverriding Delegators\n' + '='.repeat(21));
 
   if (Object.keys(report.overrides).length > 0) {
-    Object.entries(report.overrides).forEach(([delegator]) => {
-      let primaryName = '';
-      if (report.primaryNames[delegator]) {
-        primaryName = ' (' + report.primaryNames[delegator] + ')';
-      }
-      console.log(`${delegator}${primaryName}`);
+    Object.entries(report.overrides).forEach(([delegator, details]) => {
+      const balance = formatBalance(details.balance);
+      const primaryName = report.primaryNames[delegator] ? ' (' + report.primaryNames[delegator] + ')' : '';
+      console.log(`${balance} ${delegator}${primaryName}`);
     });
   } else {
     console.log('None');
@@ -42,11 +40,9 @@ async function printOverrideReport(proposalId: string, retrievePrimaryNames=true
       if (details.delegators.length > 0) {
         delegators = '\nOverriding Delegators:';
         details.delegators.forEach((delegator: string) => {
-          let primaryName = '';
-          if (report.primaryNames[delegator]) {
-            primaryName = ' (' + report.primaryNames[delegator] + ')';
-          }
-          delegators += `\n    ${delegator}${primaryName}`;
+          const balance = formatBalance(report.overrides[delegator].balance);
+          const primaryName = report.primaryNames[delegator] ? ' (' + report.primaryNames[delegator] + ')' : '';
+          delegators += `\n    ${balance} ${delegator}${primaryName}`;
         });
       }
 
@@ -152,6 +148,7 @@ async function _getOverrides(proposal: Record<any, any>, debug=false): Promise<R
 
   // If enabled, get Snapshot delegations. This will not include any delegators that are already in the addresses list.
   const snapshotDelegations = includeSnapshotDelegations ? await getSnapshotDelegations(space, network, voterAddresses, snapshot) : {};
+  const snapshotDelegators = {};
   if (debug && includeSnapshotDelegations) {
     console.debug('snapshotDelegations', snapshotDelegations);
   }
@@ -166,6 +163,7 @@ async function _getOverrides(proposal: Record<any, any>, debug=false): Promise<R
       const delegatorLc = lowerCase(delegator);
       totalAddresses.push(delegatorLc);
       voters[delegatorLc] = voters[delegate];
+      snapshotDelegators[delegatorLc] = delegate;
     })));
   }
 
@@ -185,7 +183,7 @@ async function _getOverrides(proposal: Record<any, any>, debug=false): Promise<R
         choice: voters[voter],
         balance: balances[voter],
         delegate: delegators[voter],
-        delegateChoice: voters[getDelegateForChoice(delegators, voterAddresses, voter)] || null
+        delegateChoice: voters[getDelegateForChoice(voter, voterAddresses, delegators, snapshotDelegators)] || null
       }
     ]
   ));
@@ -323,10 +321,16 @@ async function getBalances(addresses: Array<string>, network: string, snapshot: 
   return balances;
 }
 
-function getDelegateForChoice(delegators: Record<string, string>, voterAddresses: Array<string>, voter: string) {
+function getDelegateForChoice(voter: string, voterAddresses: Array<string>, delegators: Record<string, string>, snapshotDelegators: Record<string, string>) {
   const delegate = delegators[voter];
-  if (delegate && !voterAddresses.includes(delegate) && delegators[delegate]) {
-    return delegators[delegate];
+  /*
+    If the delegate is not in the list of voters, then it may be a snapshot delegator.
+    This will attempt to look one level deeper to get the delegate of the delegate,
+    so that the proper proposal choice can be determined. See if an on-chain delegate
+    was found, or else fallback to the snapshot delegate.
+  */
+  if (delegate && !voterAddresses.includes(delegate) && (delegators[delegate] || snapshotDelegators[delegate])) {
+    return delegators[delegate] || snapshotDelegators[delegate];
   }
   return delegate;
 }
@@ -382,6 +386,38 @@ function getChoiceName(proposal: Record<any, any>, choice: any): any {
     }
   } catch (e) {}
   return null;
+}
+
+function formatBalance(balance: number, len=5): string {
+  let formatted = '';
+  let suffix = '';
+
+  if (balance < 1) {
+    formatted = balance.toPrecision(len - 2);
+  } else if (balance < 1000) {
+    formatted = balance.toPrecision(len - 1);
+  } else if (balance < 1000000) {
+    formatted = (balance / 1000.0).toPrecision(len - 2);
+    suffix = 'k';
+  } else if (balance < 1000000000) {
+    formatted = (balance / 1000000.0).toPrecision(len - 2);
+    suffix = 'm';
+  } else {
+    formatted = (balance / 1000000000.0).toPrecision(len - 2);
+    suffix = 'b';
+  }
+
+  if (formatted.indexOf('.') >= 0) {
+    while (formatted.charAt(formatted.length - 1) === '0') {
+      formatted = formatted.substring(0, formatted.length - 1);
+    }
+    if (formatted.charAt(formatted.length - 1) === '.') {
+      formatted = formatted.substring(0, formatted.length - 1);
+    }
+  }
+
+  const padding = len - formatted.length - suffix.length;
+  return formatted + suffix + (padding > 0 ? ' '.repeat(padding) : '');
 }
 
 function parseValue(value: any, decimals: number): number {

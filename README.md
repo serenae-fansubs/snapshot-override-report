@@ -26,7 +26,7 @@ Proposal Test
 
 Overriding Delegators
 =====================
-0x1111111111111111111111111111111111111111
+100   0x1111111111111111111111111111111111111111 (delegatorprimaryname.eth)
 
 Overriden Vote Deltas
 =====================
@@ -35,7 +35,7 @@ Choice "For" (1): -100
 
 Choice "Against" (2): 100
 Overriding Delegators:
-    0x1111111111111111111111111111111111111111 (delegatorprimaryname.eth)
+    100   0x1111111111111111111111111111111111111111 (delegatorprimaryname.eth)
 ```
 
 ## Other Options
