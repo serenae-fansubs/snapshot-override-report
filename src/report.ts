@@ -332,6 +332,9 @@ function getDelegateForChoice(delegators: Record<string, string>, voterAddresses
 }
 
 async function getPrimaryNames(overrides: Record<string, Record<any, any>>, debug=false): Promise<Record<string, any>> {
+  if (debug) {
+    console.debug('Retrieving ENS primary names...');
+  }
   const ens = new ENS({ provider: snapshotjs.utils.getProvider('1'), ensAddress: getEnsAddress('1') });
   const primaryNames = {};
   const overrideEntries = Object.entries(overrides);
@@ -340,13 +343,13 @@ async function getPrimaryNames(overrides: Record<string, Record<any, any>>, debu
     const details = overrideEntries[i][1];
     const addresses = Object.keys(primaryNames);
     if (!addresses.includes(delegator)) {
-      const primaryName = await getPrimaryName(ens, delegator);
+      const primaryName = await getPrimaryName(ens, delegator, debug);
       if (primaryName) {
         primaryNames[delegator] = primaryName;
       }
     }
     if (details.delegate && !addresses.includes(details.delegate)) {
-      const primaryName = await getPrimaryName(ens, details.delegate);
+      const primaryName = await getPrimaryName(ens, details.delegate, debug);
       if (primaryName) {
         primaryNames[details.delegate] = primaryName;
       }
@@ -358,12 +361,15 @@ async function getPrimaryNames(overrides: Record<string, Record<any, any>>, debu
   return primaryNames;
 }
 
-async function getPrimaryName(ens: ENS, address: string): Promise<any> {
+async function getPrimaryName(ens: ENS, address: string, debug=false): Promise<any> {
   let ensName = null;
   ({ name: ensName } = await ens.getName(address))
   // Check to be sure the reverse record is correct. skip check if the name is null
   if(ensName == null || lowerCase(address) != lowerCase(await ens.name(ensName).getAddress())) {
     ensName = null;
+  }
+  if (debug) {
+    console.debug(`${address}: ${ensName}`);
   }
   return ensName;
 }
