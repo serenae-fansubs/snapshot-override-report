@@ -31,7 +31,7 @@ async function printOverrideReport(proposalId: string, debug=false) {
     console.log('None');
   }
 
-  console.log('\nOverriden Vote Deltas\n' + '='.repeat(21));
+  console.log('\nOverridden Vote Deltas\n' + '='.repeat(22));
 
   if (Object.keys(report.deltas).length > 0) {
     Object.entries(report.deltas).forEach(([choice, details]) => {
