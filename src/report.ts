@@ -11,9 +11,9 @@ const DELEGATES_ABI = ['function delegates(address account) view returns (addres
 const BALANCEOF_NAME = 'balanceOf';
 const BALANCEOF_ABI = ['function balanceOf(address account) view returns (uint256)'];
 
-async function printOverrideReport(proposalId: string, debug=false) {
+async function printOverrideReport(proposalId: string, retrievePrimaryNames=true, debug=false) {
   const proposal = await getProposal(proposalId, debug);
-  const report = await _getOverrideReport(proposal, debug);
+  const report = await _getOverrideReport(proposal, retrievePrimaryNames, debug);
 
   console.log('\nProposal ' + proposal.title + '\n' + '='.repeat(proposal.title.length + 9));
 
@@ -57,16 +57,16 @@ async function printOverrideReport(proposalId: string, debug=false) {
   }
 }
 
-async function getOverrideReport(proposalId: string, debug=false): Promise<Record<string, Record<any, any>>> {
-  return _getOverrideReport(await getProposal(proposalId), debug);
+async function getOverrideReport(proposalId: string, retrievePrimaryNames=true, debug=false): Promise<Record<string, Record<any, any>>> {
+  return _getOverrideReport(await getProposal(proposalId), retrievePrimaryNames, debug);
 }
 
-async function _getOverrideReport(proposal: Record<any, any>, debug=false): Promise<Record<string, Record<any, any>>> {
+async function _getOverrideReport(proposal: Record<any, any>, retrievePrimaryNames=true, debug=false): Promise<Record<string, Record<any, any>>> {
   const overrides = await _getOverrides(proposal, debug);
   const report = {
     overrides,
     deltas: getDeltas(proposal, overrides, debug),
-    primaryNames: await getPrimaryNames(overrides, debug)
+    primaryNames: retrievePrimaryNames ? await getPrimaryNames(overrides, debug) : {}
   };
   if (debug) {
     console.debug('report', report);

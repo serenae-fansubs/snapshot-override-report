@@ -4,6 +4,7 @@ const readline = require('readline');
 
 const proposalId = getParam('proposal');
 const json = hasParam('json');
+const skipPrimaryNames = hasParam('skipprimarynames');
 const debug = hasParam('debug');
 
 if (!proposalId) {
@@ -21,8 +22,8 @@ if (!proposalId) {
 
 async function report (proposalId: string) {
   if (json) {
-    console.log(JSON.stringify(await getOverrideReport(proposalId, debug), null, 2));
+    console.log(JSON.stringify(await getOverrideReport(proposalId, !skipPrimaryNames, debug), null, 2));
   } else {
-    printOverrideReport(proposalId, debug);
+    printOverrideReport(proposalId, !skipPrimaryNames, debug);
   }
 }

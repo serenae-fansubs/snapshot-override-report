@@ -29,10 +29,10 @@ describe(`\nGet overrides for proposal ${proposalId}`, () => {
   }, 2e4);
 
   it('At least one override and delta should be detected in report', async () => {
-    const report = await getOverrideReport(proposalId, debug);
+    const report = await getOverrideReport(proposalId, true, debug);
     expect(Object.keys(report.overrides).length).toBeGreaterThan(0);
     expect(Object.keys(report.deltas).length).toBeGreaterThan(0);
   }, 2e4);
 
-  it('Override report is printed without errors', async () => printOverrideReport(proposalId, debug), 2e4);
+  it('Override report is printed without errors', async () => printOverrideReport(proposalId, true, debug), 2e4);
 });

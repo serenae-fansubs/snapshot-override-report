@@ -60,6 +60,7 @@ node dist
 
 - `--proposal=<proposalId>` — Pass the proposal ID in directly instead of with interactive input
 - `--json` — Print the report in JSON format instead
+- `--skipprimarynames` — ENS primary names will not be retrieved (faster report)
 - `--debug` — Enable debug logging
 
 #### Report JSON format
