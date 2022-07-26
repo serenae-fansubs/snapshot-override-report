@@ -1,6 +1,6 @@
 {
   "name": "@serenae-fansubs/snapshot-override-report",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/index.js",
   "exports": {
     ".": "./dist/index.js"
@@ -19,9 +19,9 @@
     "pretest": "npm run build"
   },
   "dependencies": {
-    "@ethersproject/address": "^5.0.4",
-    "@ethersproject/units": "^5.0.3",
-    "@snapshot-labs/snapshot.js": "^0.3.54",
+    "@ethersproject/address": "^5.6.1",
+    "@ethersproject/units": "^5.6.1",
+    "@snapshot-labs/snapshot.js": "^0.4.12",
     "@ensdomains/ensjs": "^2.1.0"
   },
   "devDependencies": {
